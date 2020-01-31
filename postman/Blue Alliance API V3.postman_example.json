@@ -1,0 +1,34 @@
+{
+    "id": "eadc5f06-7e93-4694-ba80-c1be1264afbd",
+    "name": "Blue Alliance API V3",
+    "values": [
+        {
+            "key": "API_KEY",
+            "value": "ADD API KEY HERE",
+            "enabled": true
+        },
+        {
+            "key": "API_URL",
+            "value": "https://www.thebluealliance.com/api/v3",
+            "enabled": true
+        },
+        {
+            "key": "EVENT_KEY",
+            "value": "2019onwin",
+            "enabled": true
+        },
+        {
+            "key": "TEAM_KEY",
+            "value": "frc2852",
+            "enabled": true
+        },
+        {
+            "key": "YEAR",
+            "value": "2019",
+            "enabled": true
+        }
+    ],
+    "_postman_variable_scope": "environment",
+    "_postman_exported_at": "2020-01-30T00:57:47.335Z",
+    "_postman_exported_using": "Postman/7.16.1"
+}

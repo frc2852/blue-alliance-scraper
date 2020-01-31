@@ -1,0 +1,61 @@
+{
+    "info": {
+        "_postman_id": "486a7880-0354-4cd6-939f-388a69c233a6",
+        "name": "Blue Alliance API V3",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "/team/{team_key}/media/{year}",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "X-TBA-Auth-Key",
+                        "value": "{{API_KEY}}",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "{{API_URL}}/team/{{TEAM_KEY}}/media/{{YEAR}}",
+                    "host": [
+                        "{{API_URL}}"
+                    ],
+                    "path": [
+                        "team",
+                        "{{TEAM_KEY}}",
+                        "media",
+                        "{{YEAR}}"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "​/event​/{event_key}​/matches",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "X-TBA-Auth-Key",
+                        "value": "{{API_KEY}}",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "/event/{{EVENT_KEY}}/matches",
+                    "host": [
+                        "{{API_URL}}"
+                    ],
+                    "path": [
+                        "event",
+                        "{{EVENT_KEY}}",
+                        "matches"
+                    ]
+                }
+            },
+            "response": []
+        }
+    ],
+    "protocolProfileBehavior": {}
+}
