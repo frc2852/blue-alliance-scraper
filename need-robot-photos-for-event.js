@@ -28,23 +28,6 @@ const getRobotImages = robotResponse => {
     return null;
 };
 
-const buildRobotForMatch = async (teamKey, cliQuestions) => {
-    const robotUrl = apiVersionUrl + '/team/' + teamKey + '/media/' + cliQuestions.year;
-
-    try {
-        const robotResponse = await request.get(robotUrl, { headers: { 'X-TBA-Auth-Key': apiKey } });
-
-        const robotImages = getRobotImages(robotResponse);
-
-        return {
-            teamKey,
-            imageUrls: robotImages,
-        };
-    } catch (e) {
-        console.log('failed on url', robotUrl, e);
-    }
-};
-
 const run = async () => {
     const cliQuestions = await inquirer.prompt([
         {
@@ -59,33 +42,37 @@ const run = async () => {
         },
     ]);
 
-    const eventMatchesURL = apiVersionUrl + '/event/' + cliQuestions.eventKey + '/matches';
+    const eventMatchesURL = apiVersionUrl + '/event/' + cliQuestions.eventKey + '/teams/keys';
     const response = await request.get(eventMatchesURL, { headers: { 'X-TBA-Auth-Key': apiKey } });
-    const eventMatches = JSON.parse(response);
+    const teamKeys = JSON.parse(response);
 
-    const collectionMatches = await db
+    const eventDoc = await db
         .collection('events')
         .doc(cliQuestions.eventKey)
-        .collection('matches');
 
-    const docMatches = eventMatches.map(async match => {
-        const matchDoc = await collectionMatches.doc(match.key);
+    const robotMediaList = await Promise.all(teamKeys.map(async teamKey => {
+        const robotMediaUrl = apiVersionUrl + '/team/' + teamKey + '/media/' + cliQuestions.year;
 
-        const redBots = match.alliances.red.team_keys;
-        const blueBots = match.alliances.blue.team_keys;
+        const robotMediaResponse = await request.get(robotMediaUrl, { headers: { 'X-TBA-Auth-Key': apiKey } });
+        const robotPhotoUrls = getRobotImages(robotMediaResponse);
 
-        const redTeam = await Promise.all(redBots.map(teamKey => buildRobotForMatch(teamKey, cliQuestions)));
-        const blueTeam = await Promise.all(blueBots.map(teamKey => buildRobotForMatch(teamKey, cliQuestions)));
+        return { teamKey, photos: robotPhotoUrls };
+    }));
 
-        const matchObj = {
-            redTeam,
-            blueTeam,
-        };
+    const needRobotPhotos = robotMediaList
+        .filter(robotMedia => robotMedia.photos === null)
+        .map(robotMedia => robotMedia.teamKey);
 
-        return matchDoc.set(matchObj);
+    await eventDoc.set({ needRobotPhotos }, { merge: true });
+
+    const robotCollection = await db
+        .collection('robots');
+
+    const robotDocs = robotMediaList.map(robotMedia => {
+        return robotCollection.doc(robotMedia.teamKey).set({ photos: robotMedia.photos }, { merge: true });
     });
 
-    await Promise.all(docMatches);
+    await Promise.all(robotDocs);
 };
 
 run();
