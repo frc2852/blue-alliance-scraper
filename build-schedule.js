@@ -53,6 +53,11 @@ const run = async () => {
             default: process.env.EVENT_KEY,
         },
         {
+            name: 'compLevel',
+            message: 'Enter the competition level [qm, ef, qf, sf, f]:',
+            default: process.env.COMP_LEVEL,
+        },
+        {
             name: 'year',
             message: 'Enter year for robot images:',
             default: process.env.YEAR,
@@ -68,7 +73,9 @@ const run = async () => {
         .doc(cliQuestions.eventKey)
         .collection('matches');
 
-    const docMatches = eventMatches.map(async match => {
+    const compLevelMatches = eventMatches.filter(match => match.comp_level === cliQuestions.compLevel);
+
+    const docMatches = compLevelMatches.map(async (match) => {
         const matchDoc = await collectionMatches.doc(match.key);
 
         const redBots = match.alliances.red.team_keys;
@@ -80,9 +87,18 @@ const run = async () => {
         const matchObj = {
             redTeam,
             blueTeam,
+            matchNumber: match.match_number
         };
 
-        return matchDoc.set(matchObj);
+        if (match.match_number > 1) {
+            matchObj.previousMatch = cliQuestions.eventKey + '_' + cliQuestions.compLevel + (match.match_number - 1);
+        }
+
+        if (match.match_number !== compLevelMatches.length) {
+            matchObj.nextMatch = cliQuestions.eventKey + '_' + cliQuestions.compLevel + (match.match_number + 1);
+        }
+
+        return matchDoc.set(matchObj, { merge: true });
     });
 
     await Promise.all(docMatches);
